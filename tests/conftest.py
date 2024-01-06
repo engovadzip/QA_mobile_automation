@@ -2,6 +2,7 @@ import pytest
 from appium.options.android import UiAutomator2Options
 from appium.options.ios import XCUITestOptions
 from selene import browser
+from selenium import webdriver
 from dotenv import load_dotenv
 import os
 
@@ -10,13 +11,15 @@ import os
 def load_env():
     load_dotenv()
 
-
-@pytest.fixture(scope='session')
-def android_set():
     username = os.getenv('USER')
     userkey = os.getenv('KEY')
     remote_url = os.getenv('URL')
 
+    return username, userkey, remote_url
+
+
+@pytest.fixture(scope='session')
+def android_set(load_env):
     options = UiAutomator2Options().load_capabilities({
         "platformName": "android",
         "platformVersion": "13.0",
@@ -29,24 +32,19 @@ def android_set():
             "buildName": "android_wiki_build",
             "sessionName": "Android wiki autotest",
 
-            "userName": username,
-            "accessKey": userkey
+            "userName": load_env[0],
+            "accessKey": load_env[1]
         }
     })
 
-    browser.config.driver_remote_url = remote_url
-    browser.config.driver_options = options
+    browser.config.driver = webdriver.Remote(load_env[2], options=options)
 
     yield
 
     browser.quit()
 
 @pytest.fixture(scope='session')
-def ios_set():
-    username = os.getenv('USER')
-    userkey = os.getenv('KEY')
-    remote_url = os.getenv('URL')
-
+def ios_set(load_env):
     options = XCUITestOptions().load_capabilities({
         "platformName": "ios",
         "platformVersion": "17.0",
@@ -59,15 +57,13 @@ def ios_set():
             "buildName": "ios_sample_build",
             "sessionName": "iOS sample app autotest",
 
-            "userName": username,
-            "accessKey": userkey
+            "userName": load_env[0],
+            "accessKey": load_env[1]
         }
     })
 
-    browser.config.driver_remote_url = remote_url
-    browser.config.driver_options = options
+    browser.config.driver = webdriver.Remote(load_env[2], options=options)
 
     yield
 
     browser.quit()
-
