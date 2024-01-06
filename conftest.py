@@ -11,7 +11,7 @@ def load_env():
     load_dotenv()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='session')
 def android_set():
     username = os.getenv('USER')
     userkey = os.getenv('KEY')
@@ -41,7 +41,7 @@ def android_set():
 
     browser.quit()
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='session')
 def ios_set():
     username = os.getenv('USER')
     userkey = os.getenv('KEY')
