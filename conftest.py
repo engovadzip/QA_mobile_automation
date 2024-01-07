@@ -2,24 +2,21 @@ import pytest
 from appium.options.android import UiAutomator2Options
 from appium.options.ios import XCUITestOptions
 from selene import browser
-from selenium import webdriver
 from dotenv import load_dotenv
 import os
+from appium import webdriver
 
 
 @pytest.fixture(scope='session', autouse=True)
 def load_env():
     load_dotenv()
 
+
+@pytest.fixture(scope='session')
+def android_set():
     username = os.getenv('USER')
     userkey = os.getenv('KEY')
     remote_url = os.getenv('URL')
-
-    return username, userkey, remote_url
-
-
-@pytest.fixture(scope='session')
-def android_set(load_env):
     options = UiAutomator2Options().load_capabilities({
         "platformName": "android",
         "platformVersion": "13.0",
@@ -32,19 +29,27 @@ def android_set(load_env):
             "buildName": "android_wiki_build",
             "sessionName": "Android wiki autotest",
 
-            "userName": load_env[0],
-            "accessKey": load_env[1]
+            "userName": username,
+            "accessKey": userkey
         }
     })
 
-    browser.config.driver = webdriver.Remote(load_env[2], options=options)
+    browser.config.driver = webdriver.Remote(
+        remote_url,
+        options=options
+    )
 
     yield
 
     browser.quit()
 
+
 @pytest.fixture(scope='session')
-def ios_set(load_env):
+def ios_set():
+    username = os.getenv('USER')
+    userkey = os.getenv('KEY')
+    remote_url = os.getenv('URL')
+
     options = XCUITestOptions().load_capabilities({
         "platformName": "ios",
         "platformVersion": "17.0",
@@ -57,12 +62,15 @@ def ios_set(load_env):
             "buildName": "ios_sample_build",
             "sessionName": "iOS sample app autotest",
 
-            "userName": load_env[0],
-            "accessKey": load_env[1]
+            "userName": username,
+            "accessKey": userkey
         }
     })
 
-    browser.config.driver = webdriver.Remote(load_env[2], options=options)
+    browser.config.driver = webdriver.Remote(
+        remote_url,
+        options=options
+    )
 
     yield
 
